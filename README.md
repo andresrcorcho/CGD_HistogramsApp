@@ -11,3 +11,5 @@ launched for the first time.
 #The /Datasets folder contains a collection of datasets with a pre-defined as a demonstration of HistogramsApp capabilities. 
 
 #The /Results folder contains all outputs produced by the application acoording to the text specified in the Dataset label.
+
+The compiled application for both Windows and Mac can be downloaded from: https://sourceforge.net/projects/histogramsapp/
