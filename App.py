@@ -309,9 +309,12 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.peakvalue.setText(str(self.delta.value()))
     
     def selectFiles(self):
+        #Get working directory
+        userDir=os.path.expanduser('~/')
+        currentDir=userDir+'CGD_DataStructure/'
         FilePaths=[]
         # open the dialog and get the selected files
-        File, _filter = QtWidgets.QFileDialog.getOpenFileNames(self,'Load Data',"./Data/","Data File (*.txt)")
+        File, _filter = QtWidgets.QFileDialog.getOpenFileNames(self,'Load Data',currentDir+"/Data/","Data File (*.txt)")
             
         for j in File:
             try:
