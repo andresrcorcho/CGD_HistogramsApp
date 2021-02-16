@@ -2,7 +2,7 @@ import numpy as np
 from scipy import stats
 import scipy
 from scipy.signal import fftconvolve
-#from sklearn.neighbors import KernelDensity
+from sklearn.neighbors import KernelDensity
 from io import StringIO
 from scipy.stats import gaussian_kde
 
@@ -23,7 +23,7 @@ def PDP(x1_grid,data_array,sigma_array):
         else:
             PDF+=(solve_gaussian((x1_grid-data_array[i]),sigma_array[i]))
         
-    return PDF/len(data_array)
+    return PDF#/len(data_array)
 
 #KDE- Fixed -Method 1
 def KDEp(x1_grid,data_array,bandwidth):
@@ -34,16 +34,16 @@ def KDEp(x1_grid,data_array,bandwidth):
 			KDE+=solve_gaussian((x1_grid-data_array[i]),bandwidth)
 	#counter=counter+1
 
-	return KDE/len(data_array)
+	return KDE#/len(data_array)
 
-##KDE-Fixed- Method 1
-#def kde_sklearn(x, x_grid, bandwidth=0.2, **kwargs): 
-#    #Kernel Density Estimation with Scikit-learn
-#    kde_skl = KernelDensity(bandwidth=bandwidth, **kwargs)
-#    kde_skl.fit(x[:, np.newaxis])
-#    # score_samples() returns the log-likelihood of the samples
-#    log_pdf = kde_skl.score_samples(x_grid[:, np.newaxis])
-#    return np.exp(log_pdf)
+#KDE-Fixed- Method 1
+def kde_sklearn(x, x_grid, bandwidth=0.2, **kwargs): 
+    #Kernel Density Estimation with Scikit-learn
+    kde_skl = KernelDensity(bandwidth=bandwidth, **kwargs)
+    kde_skl.fit(x[:, np.newaxis])
+    # score_samples() returns the log-likelihood of the samples
+    log_pdf = kde_skl.score_samples(x_grid[:, np.newaxis])
+    return np.exp(log_pdf)
 
 #KDE-Fixed- Method 2 (Implemented here)
 def kde_scipy(x, x_grid, bandwidth=0.2, **kwargs):

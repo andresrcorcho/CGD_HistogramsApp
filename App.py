@@ -92,6 +92,9 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.peakLabel.clicked.connect(self.labelDetect)
         #shared mode protection
         self.sharedXY.clicked.connect(self.shareEvent)
+        self.YAxisTicks.clicked.connect(self.shareEvent)
+        self.Hist.clicked.connect(self.shareEvent)
+        self.geoScale.clicked.connect(self.shareEvent)
         #Expand Figure Mode
         #If Option is Checked
         self.exoandStatus.clicked.connect(self.expandMode)
@@ -170,6 +173,12 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         counter=0
         #Get Current Widget Index
         index=self.Methods.currentIndex()
+        
+        indices=self.getIndices()
+        if len(indices)<2:
+            self.sharedXY.setEnabled(False)
+        else:
+            self.sharedXY.setEnabled(True)
         for i in tabs:
             base=eval('self.'+i)
             #Get Maximum scroll dimensions
@@ -226,11 +235,11 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         height =self.getCurrentTabSize(Widg)[1]-17
         #Size Factors from sliders
         if float(self.sizeFactorV.value())>1:
-            factorV=(height/10.)*float(self.sizeFactorV.value())
+            factorV=(height/15.)*float(self.sizeFactorV.value())
         else:
             factorV=0
         if float(self.sizeFactorH.value())>1:
-            factorH=(width/10.)*float(self.sizeFactorH.value())
+            factorH=(width/15.)*float(self.sizeFactorH.value())
         else:
             factorH=0
         #Changing FigSize Settings-If the Slider value is 1, the window size remains as the default screen area
@@ -257,7 +266,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
     
     def adjustToSize(self,base):
         if self.sharedXY.isChecked()==True:
-            base.canvas.fig.tight_layout(pad=0.04,h_pad=-0.5,w_pad=0.0)
+            base.canvas.fig.tight_layout(pad=0.1,h_pad=0.0,w_pad=0.0)
+            base.canvas.fig.subplots_adjust(hspace=0.0)
             base.canvas.updateGeometry()
         else:
             base.canvas.fig.tight_layout(pad=0.5,h_pad=0.4,w_pad=0.0)
@@ -753,9 +763,17 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             bx.spines['bottom'].set_color('none')
             bx.spines['left'].set_color('none')
             bx.spines['right'].set_color('none')
-            bx.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
-            bx.get_yaxis().set_ticks([])
-            #bx.get_xaxis().set_ticks([])
+            #bx.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
+            bx.tick_params(labelsize=float(self.TSize.value()))
+            bx.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+            #bx.tick_params(labelcolor='w')
+            #bx.get_yaxis().set_ticks([])
+#            for i in arrangeTicks:
+#                if reset!=0:
+#                    ax.xticks = ax.xaxis.get_major_ticks()
+#                    ax.xticks[counter].label1.set_visible(False)
+#                counter=counter+1
+            bx.get_xaxis().set_ticks([])
                 
         for i in indices:
             #KDE Calculation
@@ -766,24 +784,37 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             if self.Hist.isChecked()==True:
                 ax1=ax.twinx()
                 ax.hist(self.DataAges[i],bins=int(float(self.bins.text())),color='cornflowerblue',edgecolor='darkgreen', linewidth=0.8, density=True)
-                ax.yaxis.set_major_locator(mpl.ticker.LinearLocator(5))
-                ax.get_yaxis().set_ticks([])
+                ax.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
+                #ax.get_yaxis().set_ticks([])
                 #Verification of Shared Axes
                 if self.sharedXY.isChecked()==True:
-                    #Common X,Y Axes
-                    bx.set_ylabel("Probability Density", labelpad=2,fontsize=float(self.TSize.value()))
-                    if float(self.TSize.value())>7:
-                        scaleAxisText=float(self.TSize.value()/1.25)
-                    else:
-                        scaleAxisText=float(self.TSize.value()/1.)
-                    bx.set_xlabel("Age (Ma)",labelpad=((20./8.)*scaleAxisText), fontsize=float(self.TSize.value())) #
+#                    #Common X,Y Axes
+#                    #x-axis
+#                    if float(self.TSize.value())>7:
+#                        scaleAxisXText=float(self.TSize.value()/1.25)
+#                    else:
+#                        scaleAxisXText=float(self.TSize.value()/1.)
+#                    #y-axis
+#                    if float(self.TSize.value())>10:
+#                        scaleAxisYText=float(self.TSize.value()/1.15)
+#                    else:
+#                        scaleAxisYText=float(self.TSize.value()/1.)
+                    ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
+                    anchored_title=AnchoredText("Gonorrea",loc='center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
+                    bx.add_artist(anchored_title)
                     bx.get_xaxis().set_ticks([])
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
                     ax1.add_artist(anchored_title)
+#
+#                    ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
+#                    bx.set_xlabel("Age (Ma)",labelpad=((20./8.)*scaleAxisXText), fontsize=float(self.TSize.value())) #
+#                    bx.set_ylabel("Frequency",labelpad=((22./8.)*scaleAxisYText), fontsize=float(self.TSize.value()))
+
                 else:
                     #X and Y axis-labels per histogram
-                    ax.set_ylabel("Probability Density", fontsize=float(self.TSize.value()))
+                    ax1.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
                     ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
+                    ax1.yaxis.set_label_position("left")
                     #Title from loadaed file
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
                     ax1.add_artist(anchored_title)
@@ -804,9 +835,9 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                     ax1.plot(x1_grid,KDE[1],label='PDP n={0}'.format((eval(str(self.NSamples[i])))), color='saddlebrown',linewidth=0.8)
                 
                 #Axis settings
-                ax1.yaxis.set_major_locator(mpl.ticker.LinearLocator(5))
+                ax1.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
                 ax1.legend(loc='upper right',fontsize=int(self.TSize.value()))
-                ax1.get_yaxis().set_ticks([])
+                ax.get_yaxis().set_ticks([])
                 
                 if self.peakdetect.isChecked()==True and self.Methods.currentIndex()<2:
                     ax2=ax1.twinx()
@@ -848,18 +879,31 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 #Verification of Shared Axes
                 if self.sharedXY.isChecked()==True:
                     #Common X,Y Axes
-                    if float(self.TSize.value())>7:
-                        scaleAxisText=float(self.TSize.value()/1.25)
-                    else:
-                        scaleAxisText=float(self.TSize.value()/1.)
-                    bx.set_xlabel("Age (Ma)", labelpad=((20./8.)*scaleAxisText),fontsize=float(self.TSize.value()))
-                    bx.set_ylabel("Probability Density",labelpad=2, fontsize=float(self.TSize.value()))
+                    #x-axis
+#                    if float(self.TSize.value())>7:
+#                        scaleAxisXText=float(self.TSize.value()/1.25)
+#                    else:
+#                        scaleAxisXText=float(self.TSize.value()/1.)
+#                    #y-axis
+#                    if float(self.TSize.value())>10:
+#                        scaleAxisYText=float(self.TSize.value()/1.15)
+#                    else:
+#                        scaleAxisYText=float(self.TSize.value()/1.)
+                        
+                    ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
+                    #bx.set_xlabel("Age (Ma)", labelpad=((20./8.)*scaleAxisXText),fontsize=float(self.TSize.value()))
+                    #ax.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
+                    #bx.set_ylabel("Frequency",labelpad=((22./8.)*scaleAxisYText), fontsize=float(self.TSize.value()))
+                    anchored_title=AnchoredText("Gonorrea",loc='center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
+                    bx.add_artist(anchored_title)
+                    
+                    
                     bx.get_xaxis().set_ticks([])
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
                     ax.add_artist(anchored_title)
                 else:
                     #X and Y axis-labels per histogram
-                    ax.set_ylabel("Probability Density",fontsize=int(self.TSize.value()))
+                    ax.set_ylabel("Frequency",fontsize=int(self.TSize.value()))
                     ax.set_xlabel("Age (Ma)",fontsize=int(self.TSize.value()))
                     #Title from loadaed file
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
@@ -881,9 +925,9 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                     ax.plot(x1_grid,KDE[1],label='PDP n={0}'.format((eval(str(self.NSamples[i])))), color='saddlebrown',linewidth=0.8)
                 
                 #Axis settings
-                ax.yaxis.set_major_locator(mpl.ticker.LinearLocator(5))
+                ax.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
                 ax.legend(loc='upper right',fontsize=int(self.TSize.value()))
-                ax.get_yaxis().set_ticks([])
+                #ax.get_yaxis().set_ticks([])
                 
                 #Peaks Detection
                 if self.peakdetect.isChecked()==True and self.Methods.currentIndex()<2:
@@ -926,17 +970,19 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             adjust=(Max-Min)/(float(self.tratio.value()))
             #Arrange ticks Array
             arrangeTicks=np.arange(Min,Max,adjust)
-            #Ticks Change
+            #Ticks Change formatting
             if self.Hist.isChecked()==False:
                 ax.xaxis.set_ticks(arrangeTicks)
-                ax.get_yaxis().set_ticks([])
+                #ax.get_yaxis().set_ticks([])
                 #Ticks Float formatting
                 ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
             else:
                 ax1.xaxis.set_ticks(arrangeTicks)
-                ax1.get_yaxis().set_ticks([])
+                #ax1.get_yaxis().set_ticks([])
                 #Ticks Float formatting
                 ax1.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                ax1.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
             #Integers???
             #from matplotlib.ticker import MaxNLocator
             #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
@@ -989,7 +1035,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 ax.axvspan(1600, 2500, facecolor='#F06682', alpha=0.5)
                 #Archean
                 ax.axvspan(2500, 4000, facecolor='#ED2891', alpha=0.5)
-                    
+            
+            #Arrange ticks in the x-axis
             for i in arrangeTicks:
                 if reset!=0:
                     ax.xticks = ax.xaxis.get_major_ticks()
@@ -998,17 +1045,114 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 reset=reset+1
                 if reset==2:
                     reset=0
+                    
+            #Remove label of last tick in the y-axis
+#
+            if self.sharedXY.isChecked()==True and self.Hist.isChecked()==False:
+                ax.yticks = ax.yaxis.get_major_ticks()
+                ax.yticks[-1].label1.set_visible(False)
+            elif self.sharedXY.isChecked()==True and self.Hist.isChecked()==True:
+                ax1.yticks = ax1.yaxis.get_major_ticks()
+                ax1.yticks[-1].label1.set_visible(False)
+                    
             #Ticks Font-Size
-            ax.tick_params(axis = 'both', which = 'major', labelsize = float(self.TSize.value()))
+            
+            if self.Hist.isChecked()==False:
+                ax.tick_params(axis = 'both', which = 'major', labelsize = float(self.TSize.value()))
+            else:
+                ax1.tick_params(axis = 'both', which = 'major', labelsize = float(self.TSize.value()))
+                ax.tick_params(axis = 'both', which = 'major', labelsize = float(self.TSize.value()))
                     
             #Check for Shared XY option- Much more plot area
+            #print(len(indices),plotCounter)
             if self.sharedXY.isChecked()==True:
-                if plotCounter!=len(indices)-1 and self.Hist.isChecked()==True:
+                if plotCounter != len(indices)-1 and self.Hist.isChecked()==True:
                     ax1.get_xaxis().set_visible(False)
                     ax1.set_xticklabels([])
-                elif plotCounter!=len(indices)-1 and self.Hist.isChecked()==False:
+                elif plotCounter != len(indices)-1 and self.Hist.isChecked()==False:
+                    #x-axis
                     ax.get_xaxis().set_visible(False)
                     ax.set_xticklabels([])
+                
+                #y-axis
+                    
+            if self.sharedXY.isChecked()==True:
+                
+                bx.set_ylabel("Frequency", labelpad=0, fontsize=float(self.TSize.value()))
+                bx.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
+                
+                #Proportion text size and pad between axis and Y label
+                tickLenght=15
+                prop=15/8.
+                if self.YAxisTicks.isChecked()==True:
+                    bx.tick_params(labelcolor="none",length=prop*float(self.TSize.value()),color='white')
+                    
+                else:
+                    bx.get_yaxis().set_ticks([])
+                    bx.set_ylabel("Frequency", labelpad=6, fontsize=float(self.TSize.value()))
+                    if self.Hist.isChecked()==False:
+                        ax.get_yaxis().set_ticks([])
+                    else:
+                        ax1.get_yaxis().set_ticks([])
+            else:
+                if self.YAxisTicks.isChecked()==False:
+                    if self.Hist.isChecked()==False:
+                        ax.get_yaxis().set_ticks([])
+                        ax.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
+                        ax.get_yaxis().set_ticks([])
+                    else:
+                        ax1.get_yaxis().set_ticks([])
+                        ax1.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
+                        ax1.get_yaxis().set_ticks([])
+            
+#                if plotCounter == len(indices)-1 and self.Hist.isChecked()==True:
+#                    ax1.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
+#                elif plotCounter == len(indices)-1 and self.Hist.isChecked()==False:
+
+                    #Calculate position depending of number of subplots
+                    
+                    #Calculate first Tight-layout
+                    
+                    #ax.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
+                    #Xax,Yax=ax.set_ylabel("Frequency", fontsize=float(self.TSize.value())).get_position()
+                    
+#                    #in case of ShareXY config Bx axis
+#                    bx.set_ylabel("Frequency", labelpad=0, fontsize=float(self.TSize.value()))
+#                    bx.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
+#
+                    
+                    
+                    
+#                    base.fig.tight_layout(pad=0.1,h_pad=0.0,w_pad=0.0)
+#                    base.fig.subplots_adjust(hspace=0.0)
+                    
+                    
+                    #Coordinates transformation to figure
+                    #Convert to Figure COordinates
+                    #print(Xax,Yax)
+                    #print(Xbx,Ybx)
+                    #coordsA=base.fig.transFigure.transform((Xax, Yax))
+                    #coordsB=base.fig.transFigure.transform((0.0, 0.5))
+                    #print(coordsA)
+                    #print(coordsB)
+                    #bxCoords=bx.transAxes.inverted().transform(coordsB)
+                    #bx.yaxis.set_label_coords(*bxCoords)
+
+                    #ax.yaxis.set_label_coords(Xax, centralPosition)
+                    #coordsA=(0.1,0.5)
+                    
+                    #Convert back to axis coordinates
+                    #axcoordsY = ax.transAxes.inverted().transform(coordsA)
+                    #axcoordsY= (-0.05,centralPosition)
+                    
+                    #print(axcoordsY)
+                     #axcoordsY = ax.transAxes.inverted().transform(coordsA)
+
+                    
+                    #print(ax.set_ylabel("Frequency", fontsize=float(self.TSize.value())).get_position())
+                    #self.UpdateProperties()
+                    #bx.set_ylabel("Frequency",labelpad=((22./8.)*scaleAxisYText), fontsize=float(self.TSize.value()))
+                    #ax.get_yaxis().set_visible(False)
             #Increment Plot Counter
             plotCounter+=1
              
