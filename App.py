@@ -98,15 +98,6 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #Expand Figure Mode
         #If Option is Checked
         self.exoandStatus.clicked.connect(self.expandMode)
-        #IF the users interact with Vertical/Horizontal sliders
-        #self.sizeFactorV.sliderMoved.connect(self.expandMode)
-#        self.sizeFactorV.sliderPressed.connect(self.timerUpdate)
-#        self.sizeFactorV.valueChanged.connect(self.timerUpdate)
-#        self.sizeFactorV.sliderReleased.connect(self.timerUpdate)
-#        #self.sizeFactorH.sliderMoved.connect(self.expandMode)
-#        self.sizeFactorH.sliderPressed.connect(self.timerUpdate)
-#        self.sizeFactorH.valueChanged.connect(self.timerUpdate)
-#        self.sizeFactorH.sliderReleased.connect(self.timerUpdate)
         #Labels from peaks
         self.peakLabel.setEnabled(False)
         #Data Storage
@@ -148,7 +139,6 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.timer = QtCore.QTimer()
         self.timer.setInterval(40)
         self.timer.start(0)
-        #print(self.KDEf.scroll.horizontalScrollBar().value(),self.KDEf.scroll.horizontalScrollBar().value())
         self.timer.timeout.connect(self.UpdateProperties)
         
     def InitProperties(self):
@@ -196,18 +186,12 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 base.scroll.setGeometry(QtCore.QRect(0, 0, maxW+17, maxH+17))
                 base.canvas.resize(maxW,maxH)
                 #Update Size of Plots
-                #app.app.processEvents()
                 self.UpdateFigSize(base)
             else:
                 #Update Scroll Size
-                #base.scroll.setGeometry(QtCore.QRect(0, 0, maxW+17, maxH+17))
-                #Update Size of Plots
-                #app.app.processEvents()
                 self.UpdateFigSize(base)
             #Adjust plot to the maximum plot area
-            #app.app.processEvents()
             self.adjustToSize(base)
-
             #Counter
             counter+=1
     
@@ -766,13 +750,6 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             #bx.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
             bx.tick_params(labelsize=float(self.TSize.value()))
             bx.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-            #bx.tick_params(labelcolor='w')
-            #bx.get_yaxis().set_ticks([])
-#            for i in arrangeTicks:
-#                if reset!=0:
-#                    ax.xticks = ax.xaxis.get_major_ticks()
-#                    ax.xticks[counter].label1.set_visible(False)
-#                counter=counter+1
             bx.get_xaxis().set_ticks([])
                 
         for i in indices:
@@ -785,30 +762,14 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 ax1=ax.twinx()
                 ax.hist(self.DataAges[i],bins=int(float(self.bins.text())),color='cornflowerblue',edgecolor='darkgreen', linewidth=0.8, density=True)
                 ax.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
-                #ax.get_yaxis().set_ticks([])
                 #Verification of Shared Axes
                 if self.sharedXY.isChecked()==True:
-#                    #Common X,Y Axes
-#                    #x-axis
-#                    if float(self.TSize.value())>7:
-#                        scaleAxisXText=float(self.TSize.value()/1.25)
-#                    else:
-#                        scaleAxisXText=float(self.TSize.value()/1.)
-#                    #y-axis
-#                    if float(self.TSize.value())>10:
-#                        scaleAxisYText=float(self.TSize.value()/1.15)
-#                    else:
-#                        scaleAxisYText=float(self.TSize.value()/1.)
                     ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
                     anchored_title=AnchoredText("Gonorrea",loc='center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
                     bx.add_artist(anchored_title)
                     bx.get_xaxis().set_ticks([])
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
                     ax1.add_artist(anchored_title)
-#
-#                    ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
-#                    bx.set_xlabel("Age (Ma)",labelpad=((20./8.)*scaleAxisXText), fontsize=float(self.TSize.value())) #
-#                    bx.set_ylabel("Frequency",labelpad=((22./8.)*scaleAxisYText), fontsize=float(self.TSize.value()))
 
                 else:
                     #X and Y axis-labels per histogram
@@ -878,25 +839,9 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 #information about axis -from user
                 #Verification of Shared Axes
                 if self.sharedXY.isChecked()==True:
-                    #Common X,Y Axes
-                    #x-axis
-#                    if float(self.TSize.value())>7:
-#                        scaleAxisXText=float(self.TSize.value()/1.25)
-#                    else:
-#                        scaleAxisXText=float(self.TSize.value()/1.)
-#                    #y-axis
-#                    if float(self.TSize.value())>10:
-#                        scaleAxisYText=float(self.TSize.value()/1.15)
-#                    else:
-#                        scaleAxisYText=float(self.TSize.value()/1.)
-                        
                     ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
-                    #bx.set_xlabel("Age (Ma)", labelpad=((20./8.)*scaleAxisXText),fontsize=float(self.TSize.value()))
-                    #ax.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
-                    #bx.set_ylabel("Frequency",labelpad=((22./8.)*scaleAxisYText), fontsize=float(self.TSize.value()))
                     anchored_title=AnchoredText("Gonorrea",loc='center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
                     bx.add_artist(anchored_title)
-                    
                     
                     bx.get_xaxis().set_ticks([])
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
@@ -979,7 +924,6 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
             else:
                 ax1.xaxis.set_ticks(arrangeTicks)
-                #ax1.get_yaxis().set_ticks([])
                 #Ticks Float formatting
                 ax1.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
                 ax1.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
@@ -1104,55 +1048,6 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                         ax1.get_yaxis().set_ticks([])
                         ax1.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
                         ax1.get_yaxis().set_ticks([])
-            
-#                if plotCounter == len(indices)-1 and self.Hist.isChecked()==True:
-#                    ax1.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
-#                elif plotCounter == len(indices)-1 and self.Hist.isChecked()==False:
-
-                    #Calculate position depending of number of subplots
-                    
-                    #Calculate first Tight-layout
-                    
-                    #ax.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
-                    #Xax,Yax=ax.set_ylabel("Frequency", fontsize=float(self.TSize.value())).get_position()
-                    
-#                    #in case of ShareXY config Bx axis
-#                    bx.set_ylabel("Frequency", labelpad=0, fontsize=float(self.TSize.value()))
-#                    bx.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
-#
-                    
-                    
-                    
-#                    base.fig.tight_layout(pad=0.1,h_pad=0.0,w_pad=0.0)
-#                    base.fig.subplots_adjust(hspace=0.0)
-                    
-                    
-                    #Coordinates transformation to figure
-                    #Convert to Figure COordinates
-                    #print(Xax,Yax)
-                    #print(Xbx,Ybx)
-                    #coordsA=base.fig.transFigure.transform((Xax, Yax))
-                    #coordsB=base.fig.transFigure.transform((0.0, 0.5))
-                    #print(coordsA)
-                    #print(coordsB)
-                    #bxCoords=bx.transAxes.inverted().transform(coordsB)
-                    #bx.yaxis.set_label_coords(*bxCoords)
-
-                    #ax.yaxis.set_label_coords(Xax, centralPosition)
-                    #coordsA=(0.1,0.5)
-                    
-                    #Convert back to axis coordinates
-                    #axcoordsY = ax.transAxes.inverted().transform(coordsA)
-                    #axcoordsY= (-0.05,centralPosition)
-                    
-                    #print(axcoordsY)
-                     #axcoordsY = ax.transAxes.inverted().transform(coordsA)
-
-                    
-                    #print(ax.set_ylabel("Frequency", fontsize=float(self.TSize.value())).get_position())
-                    #self.UpdateProperties()
-                    #bx.set_ylabel("Frequency",labelpad=((22./8.)*scaleAxisYText), fontsize=float(self.TSize.value()))
-                    #ax.get_yaxis().set_visible(False)
             #Increment Plot Counter
             plotCounter+=1
              
@@ -1165,7 +1060,6 @@ def copytree2(source,dest):
     #os.mkdir(dest)
     dest_dir = os.path.join(dest,os.path.basename(source))
     shutil.copytree(source,dest_dir)
-    
     
 
 if __name__ == '__main__':
