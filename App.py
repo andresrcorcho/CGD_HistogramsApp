@@ -83,6 +83,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.loadSession.clicked.connect(self.loadStatus)
         #Reset Status
         self.resetFields.clicked.connect(self.resetStatus)
+        #Reset only files
+        self.clearSlots.clicked.connect(self.clearStatus)
         #Save Status
         self.saveSession.clicked.connect(self.saveStatus)
         #PDP/KDE are Enabled?
@@ -95,6 +97,9 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.YAxisTicks.clicked.connect(self.shareEvent)
         self.Hist.clicked.connect(self.shareEvent)
         self.geoScale.clicked.connect(self.shareEvent)
+        self.flipPosition.clicked.connect(self.flipPositions)
+        self.DecimalX.clicked.connect(self.shareEvent)
+        self.DecimalY.clicked.connect(self.shareEvent)
         #Expand Figure Mode
         #If Option is Checked
         self.exoandStatus.clicked.connect(self.expandMode)
@@ -164,11 +169,19 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #Get Current Widget Index
         index=self.Methods.currentIndex()
         
+        #Disables shared axes for plots of only one dataset
         indices=self.getIndices()
         if len(indices)<2:
             self.sharedXY.setEnabled(False)
         else:
             self.sharedXY.setEnabled(True)
+            
+        #Disables the flip button when two datasets are selected
+        if len(indices)==2:
+            self.flipPosition.setEnabled(True)
+        else:
+            self.flipPosition.setEnabled(False)
+            
         for i in tabs:
             base=eval('self.'+i)
             #Get Maximum scroll dimensions
@@ -594,6 +607,30 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.disableKDE()
         #Update Figure Settings
         self.UpdateProperties()
+        
+    def clearStatus(self):
+        #Reset Canvas
+        self.ClearCanvas("KDEf")
+        self.ClearCanvas("PDPf")
+        self.ClearCanvas("KDEa")
+        #Reset Data Variables
+        self.DataAges=[]
+        self.DataErrors=[]
+        self.Names=[]
+        self.NSamples=[]
+        self.indicesCounter=0
+        self.initiated=False
+        self.Nplots=0
+        #Status of Loaded Files
+        self.FileStatus=[]
+        for i in range(1,18):
+            root=eval('self.f'+str(i))
+            self.FileStatus.append(False)
+            root.setEnabled(False)
+            root.setChecked(False)
+            root.setText("")
+        #Files Counter
+        self.NFiles=0
     
     def saveStatus(self):
         #Get working directory
@@ -684,7 +721,56 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 base.fig.savefig(file1)
             except PermissionError as why:
                 pass
-
+                
+        
+    def flipPositions(self):
+        self.flipPosition.setEnabled(False)
+        cIndxs=self.getIndices()
+        #Upper
+        PosU=cIndxs[0]
+        Path1=eval('self.f'+str(PosU+1))
+        #Lower
+        PosL=cIndxs[1]
+        Path2=eval('self.f'+str(PosL+1))
+        #Store data temporaly
+        dataAux1=[self.Names[PosU],self.NSamples[PosU],self.DataAges[PosU],self.DataErrors[PosU]]
+        dataAux2=[self.Names[PosL],self.NSamples[PosL],self.DataAges[PosL],self.DataErrors[PosL]]
+        
+        #Postions
+        cpositions=[PosU,PosL]
+        #Fliped positions
+        cFpositions=[PosL,PosU]
+        #Fliped Data
+        flipedData=[dataAux2,dataAux1]
+        
+        for i,fliped in zip (cpositions, flipedData):
+        
+            self.Names[i]=fliped[0]
+            #Storage of Number of samples in file
+            self.NSamples[i]=fliped[1]
+            self.DataAges[i]=fliped[2]
+            #Storage of uncertainties
+            self.DataErrors[i]=fliped[3]
+            
+        Text1=Path1.text()
+        Text2=Path2.text()
+        
+        Path1.setText(Text2)
+        Path2.setText(Text1)
+        
+        self.shareEvent()
+        self.flipPosition.setEnabled(True)
+        
+    def getLocalNsamples(self,Ages):
+        Min=float(self.Minin.text())
+        Max=float(self.Maxi.text())
+        NumAges=0
+        for age in Ages:
+            if age>=Min and age<=Max:
+                NumAges=NumAges+1
+        return NumAges
+    
+    
     def plotDensity(self):
         #Lock Plot button for prevent duplication of Axex
         self.plotData.setEnabled(False)
@@ -749,10 +835,15 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             bx.spines['right'].set_color('none')
             #bx.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
             bx.tick_params(labelsize=float(self.TSize.value()))
-            bx.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+            if self.DecimalY.isChecked()==False:
+                bx.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+            else:
+                bx.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
             bx.get_xaxis().set_ticks([])
                 
         for i in indices:
+            #Update Number of samples within the time interval specified by the user
+            self.NSamples[i]=self.getLocalNsamples(self.DataAges[i])
             #KDE Calculation
             KDE=eval(Calculation)
             #Subplots Inicialization
@@ -765,8 +856,6 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 #Verification of Shared Axes
                 if self.sharedXY.isChecked()==True:
                     ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
-                    anchored_title=AnchoredText("Gonorrea",loc='center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
-                    bx.add_artist(anchored_title)
                     bx.get_xaxis().set_ticks([])
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
                     ax1.add_artist(anchored_title)
@@ -840,9 +929,6 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 #Verification of Shared Axes
                 if self.sharedXY.isChecked()==True:
                     ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
-                    anchored_title=AnchoredText("Gonorrea",loc='center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
-                    bx.add_artist(anchored_title)
-                    
                     bx.get_xaxis().set_ticks([])
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
                     ax.add_artist(anchored_title)
@@ -920,13 +1006,27 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 ax.xaxis.set_ticks(arrangeTicks)
                 #ax.get_yaxis().set_ticks([])
                 #Ticks Float formatting
-                ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-                ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                if self.DecimalX.isChecked()==False:
+                    ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                else:
+                    ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+                    
+                if self.DecimalY.isChecked()==False:
+                    ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                else:
+                    ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
             else:
                 ax1.xaxis.set_ticks(arrangeTicks)
                 #Ticks Float formatting
-                ax1.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-                ax1.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                if self.DecimalX.isChecked()==False:
+                    ax1.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                else:
+                    ax1.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+                    
+                if self.DecimalY.isChecked()==False:
+                    ax1.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                else:
+                    ax1.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
             #Integers???
             #from matplotlib.ticker import MaxNLocator
             #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
