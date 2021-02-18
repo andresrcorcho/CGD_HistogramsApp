@@ -142,7 +142,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
     
     def timerUpdate(self):
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(40)
+        self.timer.setInterval(60)
         self.timer.start(0)
         self.timer.timeout.connect(self.UpdateProperties)
         
@@ -851,7 +851,14 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             #Bins (Histogram) with Data
             if self.Hist.isChecked()==True:
                 ax1=ax.twinx()
-                ax.hist(self.DataAges[i],bins=int(float(self.bins.text())),color='cornflowerblue',edgecolor='darkgreen', linewidth=0.8, density=True)
+                
+                #Filter Data Ages for Histogram
+                DataAgesHist=np.array([])
+                for age in self.DataAges[i]:
+                    if age>=Min and age<=Max:
+                        DataAgesHist=np.append(DataAgesHist,[age])
+                
+                y, x, _ =ax.hist(DataAgesHist,bins=int(float(self.bins.text())),color='cornflowerblue',edgecolor='darkgreen', linewidth=0.8, density=False)
                 ax.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
                 #Verification of Shared Axes
                 if self.sharedXY.isChecked()==True:
@@ -862,19 +869,26 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
 
                 else:
                     #X and Y axis-labels per histogram
-                    ax1.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
+                    ax.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
                     ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
-                    ax1.yaxis.set_label_position("left")
+                    #ax1.yaxis.set_label_position("left")
+                    #ax.yaxis.set_label_position("right")
+                    #ax.yaxis.tick_right()
+                    #ax.yaxis.set_label_position("right")
                     #Title from loadaed file
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
                     ax1.add_artist(anchored_title)
                             
                 ax1.set_xlim([Min, Max])
+                ax.set_xlim([Min, Max])
+                
                 if self.Methods.currentIndex()<2:
                     ax1.set_ylim([0,max(KDE)+(max(KDE)/4)])
+                    #print(y.max())
+                    ax.set_ylim([0,y.max()+(y.max()/4)])
                 else:
-                    
                     ax1.set_ylim([0,max(KDE[1])+(max(KDE[1])/4)])
+                    ax.set_ylim([0,y.max()+(y.max()/4)])
                 #Plotting density Function
                 if self.Methods.currentIndex()<2:
                     ax1.plot(x1_grid,KDE,label='n={0}'.format((eval(str(self.NSamples[i])))), color='mediumblue',linewidth=0.8)
@@ -887,7 +901,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 #Axis settings
                 ax1.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
                 ax1.legend(loc='upper right',fontsize=int(self.TSize.value()))
-                ax.get_yaxis().set_ticks([])
+                ax1.get_yaxis().set_ticks([])
                 
                 if self.peakdetect.isChecked()==True and self.Methods.currentIndex()<2:
                     ax2=ax1.twinx()
@@ -926,6 +940,40 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                         ax2.set_ylim([0,max(KDE[1])+(max(KDE[1])/4)])
             else:
                 #information about axis -from user
+                ax3=ax.twinx()
+                #Filter Data Ages for Histogram
+                DataAgesHist=np.array([])
+                for age in self.DataAges[i]:
+                    if age>=Min and age<=Max:
+                        DataAgesHist=np.append(DataAgesHist,[age])
+#                y, x, _ =ax3.hist(DataAgesHist,bins=int(float(self.bins.text())),color='cornflowerblue',edgecolor='darkgreen', linewidth=0.8, density=False)
+#
+                ax3.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
+#
+#                #Histogram parameters for getting number of samples
+                hst,binss = np.histogram(DataAgesHist, bins=int(float(self.bins.text())))
+                tickss=np.linspace(0,hst.max()+(hst.max()/4),8)
+                #Get Histogram ticks
+            
+                #print(tickss)
+                ax3.yaxis.tick_left()
+                ax3.yaxis.set_label_position("left")
+                NSamples_ticks = []
+                if self.Hist.isChecked()==False:
+
+                    #label_format = '%.1f'
+                    counter=0
+                    for tick in ax3.get_yticks():
+                        tick = tickss[counter]
+                        if self.DecimalY.isChecked()==True:
+                            NSamples_ticks.append('%.1f' % (tick,))
+                        else:
+                            NSamples_ticks.append('%.0f' % (tick,))
+                        
+                        counter=counter+1
+                ax3.set_yticklabels(NSamples_ticks)
+                
+            
                 #Verification of Shared Axes
                 if self.sharedXY.isChecked()==True:
                     ax.set_xlabel("Age (Ma)", fontsize=float(self.TSize.value()))
@@ -934,7 +982,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                     ax.add_artist(anchored_title)
                 else:
                     #X and Y axis-labels per histogram
-                    ax.set_ylabel("Frequency",fontsize=int(self.TSize.value()))
+                    ax3.set_ylabel("Frequency",fontsize=int(self.TSize.value()))
                     ax.set_xlabel("Age (Ma)",fontsize=int(self.TSize.value()))
                     #Title from loadaed file
                     anchored_title=AnchoredText(self.Names[i],loc='upper center',pad=0.1,borderpad=0.1,frameon=False,prop=dict(size=float(self.TSize.value())*1.2))
@@ -957,8 +1005,9 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 
                 #Axis settings
                 ax.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
+                #Change ticks from histogram ones
                 ax.legend(loc='upper right',fontsize=int(self.TSize.value()))
-                #ax.get_yaxis().set_ticks([])
+                ax.get_yaxis().set_ticks([])
                 
                 #Peaks Detection
                 if self.peakdetect.isChecked()==True and self.Methods.currentIndex()<2:
@@ -1019,14 +1068,14 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 ax1.xaxis.set_ticks(arrangeTicks)
                 #Ticks Float formatting
                 if self.DecimalX.isChecked()==False:
-                    ax1.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                    ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
                 else:
-                    ax1.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+                    ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
                     
                 if self.DecimalY.isChecked()==False:
-                    ax1.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+                    ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
                 else:
-                    ax1.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+                    ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
             #Integers???
             #from matplotlib.ticker import MaxNLocator
             #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
@@ -1093,15 +1142,16 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             #Remove label of last tick in the y-axis
 #
             if self.sharedXY.isChecked()==True and self.Hist.isChecked()==False:
+                ax3.yticks = ax3.yaxis.get_major_ticks()
+                ax3.yticks[-1].label1.set_visible(False)
+            elif self.sharedXY.isChecked()==True and self.Hist.isChecked()==True:
                 ax.yticks = ax.yaxis.get_major_ticks()
                 ax.yticks[-1].label1.set_visible(False)
-            elif self.sharedXY.isChecked()==True and self.Hist.isChecked()==True:
-                ax1.yticks = ax1.yaxis.get_major_ticks()
-                ax1.yticks[-1].label1.set_visible(False)
                     
             #Ticks Font-Size
             
             if self.Hist.isChecked()==False:
+                ax3.tick_params(axis = 'both', which = 'major', labelsize = float(self.TSize.value()))
                 ax.tick_params(axis = 'both', which = 'major', labelsize = float(self.TSize.value()))
             else:
                 ax1.tick_params(axis = 'both', which = 'major', labelsize = float(self.TSize.value()))
@@ -1148,6 +1198,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                         ax1.get_yaxis().set_ticks([])
                         ax1.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
                         ax1.get_yaxis().set_ticks([])
+            
+           
             #Increment Plot Counter
             plotCounter+=1
              
