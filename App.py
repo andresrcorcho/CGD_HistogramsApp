@@ -173,6 +173,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         indices=self.getIndices()
         if len(indices)<2:
             self.sharedXY.setEnabled(False)
+            self.sharedXY.setChecked(False)
         else:
             self.sharedXY.setEnabled(True)
             
