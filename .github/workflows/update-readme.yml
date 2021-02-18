@@ -11,10 +11,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-
-    - uses: actions/checkout@master
+    
     - name: Set up Python 3.7
-      uses: actions/setup-python@master
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
       with:
         python-version: 3.7
 
@@ -33,3 +33,4 @@ jobs:
       with:
         branch: master
         github_token: ${{ secrets.ACCESS_TOKEN }}
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
