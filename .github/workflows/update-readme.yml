@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     
-    - name: Set up Python 3.7
     - uses: actions/checkout@master
+    - name: Set up Python 3.7
       uses: actions/setup-python@master
       with:
         python-version: 3.7
