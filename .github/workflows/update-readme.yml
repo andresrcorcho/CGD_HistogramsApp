@@ -20,7 +20,7 @@ jobs:
 
     - name: Install dependencies & Convert README.ipynb
       run: |
-        jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
+        jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown Readme.ipynb
     - name: Commit files
       run: |
         git config --local user.email "action@github.com"
