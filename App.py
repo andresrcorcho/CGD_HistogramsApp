@@ -1184,21 +1184,21 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                     
                 else:
                     bx.get_yaxis().set_ticks([])
-                    bx.set_ylabel("Frequency", labelpad=6, fontsize=float(self.TSize.value()))
+                    bx.set_ylabel("Frequency", labelpad=7, fontsize=float(self.TSize.value()))
                     if self.Hist.isChecked()==False:
-                        ax.get_yaxis().set_ticks([])
+                        ax3.get_yaxis().set_ticks([])
                     else:
-                        ax1.get_yaxis().set_ticks([])
+                        ax.get_yaxis().set_ticks([])
             else:
                 if self.YAxisTicks.isChecked()==False:
                     if self.Hist.isChecked()==False:
                         ax.get_yaxis().set_ticks([])
                         ax.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
-                        ax.get_yaxis().set_ticks([])
+                        ax3.get_yaxis().set_ticks([])
                     else:
                         ax1.get_yaxis().set_ticks([])
-                        ax1.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
-                        ax1.get_yaxis().set_ticks([])
+                        #ax1.set_ylabel("Frequency", fontsize=float(self.TSize.value()))
+                        ax.get_yaxis().set_ticks([])
             
            
             #Increment Plot Counter
