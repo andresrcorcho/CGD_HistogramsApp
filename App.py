@@ -925,13 +925,13 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                         else:
                             texts=[]
                             for txt,x,y in zip(maxtab[:,0], maxtab[:,0],  maxtab[:,1]):
-                                txt=np.round(txt,0)
+                                txt=str(int(txt))
                                 texts.append(ax2.text(x, y,txt,size=int(self.TSize.value())))
                             if self.sharedXY.isChecked()==True:
-                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=bx,expand_text=(1.05, 1),expand_points=(1.01, 1.05),
+                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),autoalign='xy',expand_points=(1.01, 1.05),
             force_text=(0.01, 0.25), force_points=(0.01, 0.25))
                             else:
-                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax1,expand_text=(1.05, 1),expand_points=(1.01, 1.05),
+                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),autoalign='xy',expand_points=(1.01, 1.05),
             force_text=(0.01, 0.25), force_points=(0.01, 0.25))
                     ax2.get_yaxis().set_ticks([])
                     ax2.set_xlim([Min, Max])
@@ -1032,13 +1032,13 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                         else:
                             texts=[]
                             for txt,x,y in zip(maxtab[:,0], maxtab[:,0],  maxtab[:,1]):
-                                txt=np.round(txt,0)
+                                txt=str(int(txt))
                                 texts.append(ax2.text(x, y,txt,size=int(self.TSize.value())))
                             if self.sharedXY.isChecked()==True:
-                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=bx,expand_text=(1.05, 1),expand_points=(1.01, 1.05),
+                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),,autoalign='xy',expand_points=(1.01, 1.05),
             force_text=(0.01, 0.25), force_points=(0.01, 0.25))
                             else:
-                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax,expand_text=(1.05, 1),expand_points=(1.01, 1.05),
+                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),,autoalign='xy',expand_points=(1.01, 1.05),
             force_text=(0.01, 0.25), force_points=(0.01, 0.25))
                     ax2.get_yaxis().set_ticks([])
                     ax2.set_xlim([Min, Max])
