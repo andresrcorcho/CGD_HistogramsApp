@@ -7,7 +7,7 @@ from scipy.stats import gaussian_kde
 
 #Load Data
 def loadData(filename):   
-    data=np.genfromtxt(filename,skip_header=1)
+    data=np.genfromtxt(filename,skip_header=2)
     return data
 
 

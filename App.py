@@ -100,6 +100,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.flipPosition.clicked.connect(self.flipPositions)
         self.DecimalX.clicked.connect(self.shareEvent)
         self.DecimalY.clicked.connect(self.shareEvent)
+        self.customBw.clicked.connect(self.shareEvent)
         #Expand Figure Mode
         #If Option is Checked
         self.exoandStatus.clicked.connect(self.expandMode)
@@ -110,6 +111,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.DataErrors=[]
         self.Names=[]
         self.NSamples=[]
+        self.BWs=[]
         self.indicesCounter=0
         self.initiated=False
         self.Nplots=0
@@ -118,6 +120,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #BW calculation
         self.B_ratio=float(20/50)
         self.Rbw=round(self.B_ratio*self.Bw.value(),1)
+        self.BW.setText(str(self.Rbw))
         #Status of Loaded Files
         self.FileStatus=[]
         for i in range(1,18):
@@ -370,7 +373,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         return error, Errors
     
     def selectFile(self, File):
-    
+        
         if len(File)>0:
             self.initiated=True
         # if a file is selected
@@ -410,8 +413,24 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             else:
             
                 #Tittle by each file in the subplot
-                with open(File) as f:
-                    lineName = f.readline()
+                
+                with open(File) as fp:
+                    lines=fp.readlines()
+                    #print (lines[0])
+                    #print (lines[1])
+                    counter=0
+                    for line in lines:
+                        #print(fp)
+                        if counter == 0:
+                            lineName = line
+                        elif counter == 1:
+                            # 30th line
+                            bwt=line
+                        elif counter>1:
+                            break
+                        counter=counter+1
+                fp.close()
+                
                 self.Names.append(lineName)
                 #Storage of Ages
                 self.DataAges.append(ages)
@@ -425,7 +444,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 File=ntpath.basename(File)
                 #Update Number of loaded Files
                 self.NFiles=self.NFiles+1
-            
+                #Add to bandwidths
+                self.BWs.append(float(bwt))
             # update the field with a new set of data
                 for i in range(1,18):
                     root=eval('self.f'+str(i))
@@ -734,8 +754,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         PosL=cIndxs[1]
         Path2=eval('self.f'+str(PosL+1))
         #Store data temporaly
-        dataAux1=[self.Names[PosU],self.NSamples[PosU],self.DataAges[PosU],self.DataErrors[PosU]]
-        dataAux2=[self.Names[PosL],self.NSamples[PosL],self.DataAges[PosL],self.DataErrors[PosL]]
+        dataAux1=[self.Names[PosU],self.NSamples[PosU],self.DataAges[PosU],self.DataErrors[PosU],self.BWs[PosU]]
+        dataAux2=[self.Names[PosL],self.NSamples[PosL],self.DataAges[PosL],self.DataErrors[PosL],self.BWs[PosL]]
         
         #Postions
         cpositions=[PosU,PosL]
@@ -752,6 +772,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             self.DataAges[i]=fliped[2]
             #Storage of uncertainties
             self.DataErrors[i]=fliped[3]
+            self.BWs[i]=fliped[4]
             
         Text1=Path1.text()
         Text2=Path2.text()
@@ -793,7 +814,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             #Vector to Evaluate data
             x1_grid=np.linspace(Min,Max,3000)
             Plots=['KDEf','PDPf','KDEa']
-            Calculations=['KDEp(x1_grid,self.DataAges[i],bandwidth=self.Rbw)','PDP(x1_grid,self.DataAges[i],self.DataErrors[i])','KDE_PDP(self.DataAges[i], self.DataErrors[i],x1_grid,self.Rbw)']
+            
+            Calculations=['KDEp(x1_grid,self.DataAges[i],bandwidth=auxBw)','PDP(x1_grid,self.DataAges[i],self.DataErrors[i])','KDE_PDP(self.DataAges[i], self.DataErrors[i],x1_grid,self.Rbw)']
             Tabcounter=0
             #Plot Bucle
             for i in Plots:
@@ -843,6 +865,13 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             bx.get_xaxis().set_ticks([])
                 
         for i in indices:
+            #Use local or global Bandwidth
+            if self.customBw.isChecked()==True:
+                auxBw=self.BWs[i]
+            elif self.customBw.isChecked()==False:
+                auxBw=self.Rbw
+            #Update Bandwidth label
+            #self.updatelabel()
             #Update Number of samples within the time interval specified by the user
             self.NSamples[i]=self.getLocalNsamples(self.DataAges[i])
             #KDE Calculation
@@ -888,15 +917,20 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                     #print(y.max())
                     ax.set_ylim([0,y.max()+(y.max()/4)])
                 else:
-                    ax1.set_ylim([0,max(KDE[1])+(max(KDE[1])/4)])
+                    auMax=(KDE[0])
+                    if max(KDE[1])>max(auMax):
+                        auMax=KDE[1]
+                    ax1.set_ylim([0,max(auMax)+(max(auMax)/4)])
                     ax.set_ylim([0,y.max()+(y.max()/4)])
                 #Plotting density Function
-                if self.Methods.currentIndex()<2:
-                    ax1.plot(x1_grid,KDE,label='n={0}'.format((eval(str(self.NSamples[i])))), color='mediumblue',linewidth=0.8)
+                if self.Methods.currentIndex()<1:
+                    ax1.plot(x1_grid,KDE,label='n={0} - Bw={1}'.format((eval(str(self.NSamples[i]))),eval(str(auxBw))), color='mediumblue',linewidth=0.8)
                     if self.filled.isChecked()==True:
                         ax1.fill_between(x1_grid,KDE,color='powderblue', alpha=.5)
+                elif self.Methods.currentIndex()==1:
+                    ax1.plot(x1_grid,KDE,label='n={0}'.format((eval(str(self.NSamples[i]))),eval(str(auxBw))), color='mediumblue',linewidth=0.8)
                 else:
-                    ax1.plot(x1_grid,KDE[0],label='KDE-Fix n={0}'.format((eval(str(self.NSamples[i])))), color='mediumblue',linewidth=0.8)
+                    ax1.plot(x1_grid,KDE[0],label='KDE n={0} - Bw={1}'.format((eval(str(self.NSamples[i]))),eval(str(auxBw))), color='mediumblue',linewidth=0.8)
                     ax1.plot(x1_grid,KDE[1],label='PDP n={0}'.format((eval(str(self.NSamples[i])))), color='saddlebrown',linewidth=0.8)
                 
                 #Axis settings
@@ -938,7 +972,11 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                     if self.Methods.currentIndex()<2:
                         ax2.set_ylim([0,max(KDE)+(max(KDE)/4)])
                     else:
-                        ax2.set_ylim([0,max(KDE[1])+(max(KDE[1])/4)])
+                        auMax=(KDE[0])
+                        if max(KDE[1])>max(auMax):
+                            auMax=KDE[1]
+                        
+                        ax2.set_ylim([0,max(auMax)+(max(auMax)/4)])
             else:
                 #information about axis -from user
                 ax3=ax.twinx()
@@ -947,11 +985,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 for age in self.DataAges[i]:
                     if age>=Min and age<=Max:
                         DataAgesHist=np.append(DataAgesHist,[age])
-#                y, x, _ =ax3.hist(DataAgesHist,bins=int(float(self.bins.text())),color='cornflowerblue',edgecolor='darkgreen', linewidth=0.8, density=False)
-#
                 ax3.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
-#
-#                #Histogram parameters for getting number of samples
+#               #Histogram parameters for getting number of samples
                 hst,binss = np.histogram(DataAgesHist, bins=int(float(self.bins.text())))
                 tickss=np.linspace(0,hst.max()+(hst.max()/4),8)
                 #Get Histogram ticks
@@ -993,15 +1028,20 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 if self.Methods.currentIndex()<2:
                     ax.set_ylim([0,max(KDE)+(max(KDE)/4)])
                 else:
-                    ax.set_ylim([0,max(KDE[1])+(max(KDE[1])/4)])
+                    auMax=(KDE[0])
+                    if max(KDE[1])>max(auMax):
+                        auMax=KDE[1]
+                    ax.set_ylim([0,max(auMax)+(max(auMax)/4)])
                 
                 #Plotting density Function
-                if self.Methods.currentIndex()<2:
-                    ax.plot(x1_grid,KDE,label='n={0}'.format((eval(str(self.NSamples[i])))), color='mediumblue',linewidth=0.8)
+                if self.Methods.currentIndex()<1:
+                    ax.plot(x1_grid,KDE,label='n={0} - Bw={1}'.format((eval(str(self.NSamples[i]))),eval(str(auxBw))), color='mediumblue',linewidth=0.8)
                     if self.filled.isChecked()==True:
                         ax.fill_between(x1_grid,KDE,color='powderblue')
+                elif self.Methods.currentIndex()==1:
+                    ax.plot(x1_grid,KDE,label='n={0}'.format((eval(str(self.NSamples[i]))),eval(str(auxBw))), color='mediumblue',linewidth=0.8)
                 else:
-                    ax.plot(x1_grid,KDE[0],label='KDE-Fix n={0}'.format((eval(str(self.NSamples[i])))), color='mediumblue',linewidth=0.8)
+                    ax.plot(x1_grid,KDE[0],label='KDE n={0} - Bw={1}'.format((eval(str(self.NSamples[i]))),eval(str(auxBw))), color='mediumblue',linewidth=0.8)
                     ax.plot(x1_grid,KDE[1],label='PDP n={0}'.format((eval(str(self.NSamples[i])))), color='saddlebrown',linewidth=0.8)
                 
                 #Axis settings
@@ -1035,17 +1075,20 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                                 txt=str(int(txt))
                                 texts.append(ax2.text(x, y,txt,size=int(self.TSize.value())))
                             if self.sharedXY.isChecked()==True:
-                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),,autoalign='xy',expand_points=(1.01, 1.05),
+                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),autoalign='xy',expand_points=(1.01, 1.05),
             force_text=(0.01, 0.25), force_points=(0.01, 0.25))
                             else:
-                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),,autoalign='xy',expand_points=(1.01, 1.05),
+                                adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),autoalign='xy',expand_points=(1.01, 1.05),
             force_text=(0.01, 0.25), force_points=(0.01, 0.25))
                     ax2.get_yaxis().set_ticks([])
                     ax2.set_xlim([Min, Max])
                     if self.Methods.currentIndex()<2:
                         ax2.set_ylim([0,max(KDE)+(max(KDE)/4)])
                     else:
-                        ax2.set_ylim([0,max(KDE[1])+(max(KDE[1])/4)])
+                        auMax=(KDE[0])
+                        if max(KDE[1])>max(auMax):
+                            auMax=KDE[1]
+                        ax2.set_ylim([0,max(auMax)+(max(auMax)/4)])
                    
             #Ticks Adjust
             adjust=(Max-Min)/(float(self.tratio.value()))
@@ -1243,7 +1286,3 @@ if __name__ == '__main__':
     exit_code = app.app.exec_()      # 2. Invoke appctxt.app.exec_()
     #When closing the app
     sys.exit(exit_code)
-            
-
-
-

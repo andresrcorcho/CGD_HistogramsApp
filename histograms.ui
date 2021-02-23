@@ -840,6 +840,13 @@
               </property>
              </widget>
             </item>
+            <item row="10" column="4">
+             <widget class="QCheckBox" name="customBw">
+              <property name="text">
+               <string>customBws</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
