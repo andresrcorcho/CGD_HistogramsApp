@@ -93,14 +93,14 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #Adjust of peak labels?
         self.peakLabel.clicked.connect(self.labelDetect)
         #shared mode protection
-        self.sharedXY.clicked.connect(self.shareEvent)
-        self.YAxisTicks.clicked.connect(self.shareEvent)
+        #self.sharedXY.clicked.connect(self.shareEvent)
+        #self.YAxisTicks.clicked.connect(self.shareEvent)
         self.Hist.clicked.connect(self.shareEvent)
-        self.geoScale.clicked.connect(self.shareEvent)
+        #self.geoScale.clicked.connect(self.shareEvent)
         self.flipPosition.clicked.connect(self.flipPositions)
-        self.DecimalX.clicked.connect(self.shareEvent)
-        self.DecimalY.clicked.connect(self.shareEvent)
-        self.customBw.clicked.connect(self.shareEvent)
+        #self.DecimalX.clicked.connect(self.shareEvent)
+        #self.DecimalY.clicked.connect(self.shareEvent)
+        self.customBw.clicked.connect(self.customBwEv)
         #Expand Figure Mode
         #If Option is Checked
         self.exoandStatus.clicked.connect(self.expandMode)
@@ -137,6 +137,12 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.timer.setInterval(1)
         self.timer.start(0)
         self.timer.timeout.connect(self.InitProperties)
+        
+    def customBwEv(self):
+        if self.customBw.isChecked()==True:
+            self.Bw.setEnabled(False)
+        else:
+            self.Bw.setEnabled(True)
     
     #If windows is resized a signal is emited
     def resizeEvent(self, event):
@@ -172,6 +178,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #Get Current Widget Index
         index=self.Methods.currentIndex()
         
+        #Check the Bw choice
+        self.customBwEv()
         #Disables shared axes for plots of only one dataset
         indices=self.getIndices()
         if len(indices)<2:
@@ -587,6 +595,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.DataErrors=[]
         self.Names=[]
         self.NSamples=[]
+        self.BWs=[]
         self.indicesCounter=0
         self.initiated=False
         self.Nplots=0
@@ -780,7 +789,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         Path1.setText(Text2)
         Path2.setText(Text1)
         
-        self.shareEvent()
+        #self.shareEvent()
         self.flipPosition.setEnabled(True)
         
     def getLocalNsamples(self,Ages):
