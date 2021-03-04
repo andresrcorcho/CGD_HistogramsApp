@@ -1,5 +1,7 @@
 # The HistogramsApp - provided by the Colombian Geochronological database (CGD)
 
+[![DOI](https://zenodo.org/badge/335933052.svg)](https://zenodo.org/badge/latestdoi/335933052)
+
 ## Introduction
 
 <img src="./screenshots/Demo.png" alt="Drawing" style="width: 710px;/">
