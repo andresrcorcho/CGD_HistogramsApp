@@ -923,7 +923,6 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 
                 if self.Methods.currentIndex()<2:
                     ax1.set_ylim([0,max(KDE)+(max(KDE)/4)])
-                    #print(y.max())
                     ax.set_ylim([0,y.max()+(y.max()/4)])
                 else:
                     auMax=(KDE[0])
@@ -964,11 +963,18 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                     if self.peakLabel.isChecked()==True:
                         if self.adjustLabel.isChecked()==False:
                             for f in range(0,len(maxtab[:,0])):
-                                ax2.annotate(str(int(np.round(maxtab[:,0][f],0))),(maxtab[:,0][f], maxtab[:,1][f]), size=int(self.TSize.value()))
+                                if self.DecimalPeaks.isChecked()==True:
+                                    anotateKey=(np.round(maxtab[:,0][f],1))
+                                else:
+                                    anotateKey=int((maxtab[:,0][f]))
+                                ax2.annotate(str(anotateKey),(maxtab[:,0][f], maxtab[:,1][f]), size=int(self.TSize.value()))
                         else:
                             texts=[]
                             for txt,x,y in zip(maxtab[:,0], maxtab[:,0],  maxtab[:,1]):
-                                txt=str(int(txt))
+                                if self.DecimalPeaks.isChecked()==True:
+                                    txt=str(np.round(txt,1))
+                                else:
+                                    txt=str(int(txt))
                                 texts.append(ax2.text(x, y,txt,size=int(self.TSize.value())))
                             if self.sharedXY.isChecked()==True:
                                 adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),autoalign='xy',expand_points=(1.01, 1.05),
@@ -1077,11 +1083,20 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                     if self.peakLabel.isChecked()==True:
                         if self.adjustLabel.isChecked()==False:
                             for f in range(0,len(maxtab[:,0])):
-                                ax2.annotate(str(int(np.round(maxtab[:,0][f],0))),( maxtab[:,0][f], maxtab[:,1][f]), size=int(self.TSize.value()))
+                                if self.DecimalPeaks.isChecked()==True:
+                                    anotateKey=(np.round(maxtab[:,0][f],1))
+                                else:
+                                    anotateKey=int((maxtab[:,0][f]))
+                                ax2.annotate(str(anotateKey),(maxtab[:,0][f], maxtab[:,1][f]), size=int(self.TSize.value()))
                         else:
                             texts=[]
                             for txt,x,y in zip(maxtab[:,0], maxtab[:,0],  maxtab[:,1]):
-                                txt=str(int(txt))
+                                if self.DecimalPeaks.isChecked()==True:
+                                    txt=str(np.round(txt,1))
+                                    
+                                else:
+                                    txt=str(int(txt))
+                                #txt=str(int(txt))
                                 texts.append(ax2.text(x, y,txt,size=int(self.TSize.value())))
                             if self.sharedXY.isChecked()==True:
                                 adjust_text(texts,maxtab[:,0],maxtab[:,1],ax=ax2,expand_text=(1.05, 1),autoalign='xy',expand_points=(1.01, 1.05),
