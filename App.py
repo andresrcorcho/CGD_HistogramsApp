@@ -11,7 +11,7 @@ from PyQt5.QtTest import QTest
 import numpy as np
 import sys
 import histograms
-from functions import PDP, KDEp, KDE_PDP, loadData, kde_scipy, peakdet
+from functions import PDP, KDEp, KDE_PDP, loadData, kde_scipy, peakdet, kde_difussion,KDEadap_PDP
 from adjustText import adjust_text
 from pylab import figure, show, close
 from io import StringIO
@@ -141,8 +141,17 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
     def customBwEv(self):
         if self.customBw.isChecked()==True:
             self.Bw.setEnabled(False)
+            self.AdaptativeBw.setEnabled(False)
+            self.AdaptativeBw.setChecked(False)
         else:
-            self.Bw.setEnabled(True)
+            if self.AdaptativeBw.isChecked()==False:
+                self.Bw.setEnabled(True)
+                self.AdaptativeBw.setEnabled(True)
+                self.customBw.setEnabled(True)
+            else:
+                self.customBw.setChecked(False)
+                self.customBw.setEnabled(False)
+                self.Bw.setEnabled(False)
     
     #If windows is resized a signal is emited
     def resizeEvent(self, event):
@@ -821,10 +830,17 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             Min=float(self.Minin.text())
             Max=float(self.Maxi.text())
             #Vector to Evaluate data
-            x1_grid=np.linspace(Min,Max,3000)
+            x1_grid=np.linspace(Min,Max,2048)
             Plots=['KDEf','PDPf','KDEa']
             
-            Calculations=['KDEp(x1_grid,self.DataAges[i],bandwidth=auxBw)','PDP(x1_grid,self.DataAges[i],self.DataErrors[i])','KDE_PDP(self.DataAges[i], self.DataErrors[i],x1_grid,self.Rbw)']
+            if self.AdaptativeBw.isChecked()==True:
+                calculationKDE='kde_difussion(x1_grid,self.DataAges[i],Min,Max)[0]'
+                calculationKDEa_PDP='KDEadap_PDP(self.DataAges[i],self.DataErrors[i],x1_grid,Min,Max)'
+            else:
+                calculationKDE='KDEp(x1_grid,self.DataAges[i],bandwidth=auxBw)'
+                calculationKDEa_PDP='KDE_PDP(self.DataAges[i],self.DataErrors[i],x1_grid,auxBw)'
+            
+            Calculations=[calculationKDE,'PDP(x1_grid,self.DataAges[i],self.DataErrors[i])',calculationKDEa_PDP]
             Tabcounter=0
             #Plot Bucle
             for i in Plots:
@@ -878,12 +894,32 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             if self.customBw.isChecked()==True:
                 auxBw=self.BWs[i]
             elif self.customBw.isChecked()==False:
-                auxBw=self.Rbw
+                if self.AdaptativeBw.isChecked()==False:
+                    auxBw=self.Rbw
+                else:
+                    try:
+                        auxBw=np.round(eval('kde_difussion(x1_grid,self.DataAges[i],Min,Max)[1]'),2)
+                    except ValueError:
+                        #If the KDE adaptative calculation fails it will display the message and use the default Bw
+                        KDEerror_dialog = QtWidgets.QErrorMessage()
+                        KDEerror_dialog.setWindowIcon(QtGui.QIcon('icon.ico'))
+                        KDEerror_dialog.setWindowTitle('KDE Error')
+                        KDEerror_dialog.showMessage("Bandwidth optimization did not converge.The bandwidth for the: <br><br>"+
+                                            self.Names[i]+ "dataset"+" will be set to default")
+                                            
+                        KDEerror_dialog.exec_()
+                        #Set bandwidth to Default
+                        auxBw=self.Rbw
+                        if Calculation=='kde_difussion(x1_grid,self.DataAges[i],Min,Max)[0]':
+                            Calculation='KDEp(x1_grid,self.DataAges[i],bandwidth=auxBw)'
+                        elif Calculation=='KDEadap_PDP(self.DataAges[i],self.DataErrors[i],x1_grid,Min,Max)':
+                            Calculation='KDE_PDP(self.DataAges[i],self.DataErrors[i],x1_grid,auxBw)'
+                        #pass
             #Update Bandwidth label
             #self.updatelabel()
             #Update Number of samples within the time interval specified by the user
             self.NSamples[i]=self.getLocalNsamples(self.DataAges[i])
-            #KDE Calculation
+            #KDE Calculation --
             KDE=eval(Calculation)
             #Subplots Inicialization
             ax=base.fig.add_subplot(len(indices),1,plotCounter+1)
@@ -1002,7 +1038,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                         DataAgesHist=np.append(DataAgesHist,[age])
                 ax3.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
 #               #Histogram parameters for getting number of samples
-                hst,binss = np.histogram(DataAgesHist, bins=int(float(self.bins.text())))
+                hst,binss = np.histogram(DataAgesHist, bins=int(len(x1_grid))) #Fixed and based in x1_grid length
+                #hst,binss = np.histogram(DataAgesHist, bins=int(float(self.bins.text()))) - Version March 2021
                 tickss=np.linspace(0,hst.max()+(hst.max()/4),8)
                 #Get Histogram ticks
             

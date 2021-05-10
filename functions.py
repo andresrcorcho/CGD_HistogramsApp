@@ -4,6 +4,7 @@ import scipy
 from scipy.signal import fftconvolve
 from io import StringIO
 from scipy.stats import gaussian_kde
+from kde_diffusion import kde1d
 
 #Load Data
 def loadData(filename):   
@@ -25,17 +26,19 @@ def PDP(x1_grid,data_array,sigma_array):
     return PDF/len(data_array)
 
 #KDE- Fixed -Method 1
+#Implemented from the equations presented in:
+#Vermeesch, P. (2012). On the visualisation of detrital age distributions.
+#Chemical Geology, 312, 190-194.
 def KDEp(x1_grid,data_array,bandwidth):
 	for i in range(0,len(data_array)):
 		if i==0:
 			KDE=solve_gaussian((x1_grid-data_array[i]),bandwidth)
 		else:
 			KDE+=solve_gaussian((x1_grid-data_array[i]),bandwidth)
-	#counter=counter+1
 
 	return KDE/len(data_array)
 
-#KDE-Fixed- Method 2 (Implemented here)
+#KDE-Fixed- Method 2 (Not Implemented here)
 def kde_scipy(x, x_grid, bandwidth=0.2, **kwargs):
     #Kernel Density Estimation with Scipy
     # Note that scipy weights its bandwidth by the covariance of the
@@ -43,6 +46,18 @@ def kde_scipy(x, x_grid, bandwidth=0.2, **kwargs):
     # we divide the bandwidth by the sample standard deviation here.
     kde = gaussian_kde(x, bw_method=bandwidth / x.std(ddof=1), **kwargs)
     return kde.evaluate(x_grid)
+
+#Python re-implementation of the original MatLab script that describes the method of
+#Botev et al., 2010.
+#Python Implementation performed by John Henning -
+#John Hennig. (2021, April 6). John-Hennig/KDE-diffusion: KDE-diffusion 1.0.3 (Version v1.0.3).
+#Zenodo. http://doi.org/10.5281/zenodo.4663430
+def kde_difussion(x1_grid,data_array,Min,Max):
+    n=len(x1_grid)
+    (KDE, grid, bandwidth) = kde1d(data_array,n, limits=(Min,Max))
+    return KDE,bandwidth
+
+    
 
 #Peak detector
 #Peak detector
@@ -103,5 +118,12 @@ def KDE_PDP(data, sigma,x_grid,bandwidth):
     Data.append(PDPv)
     return Data
 
-
+#KDE-Adaptative + PDP
+def KDEadap_PDP(data, sigma,x1_grid,Min,Max):
+    Data=[]
+    KDEv=kde_difussion(x1_grid,data,Min,Max)[0]
+    PDPv=PDP(x1_grid,data,sigma)
+    Data.append(KDEv)
+    Data.append(PDPv)
+    return Data
 
