@@ -5,38 +5,64 @@ from scipy.signal import fftconvolve
 from io import StringIO
 from scipy.stats import gaussian_kde
 from kde_diffusion import kde1d
+from Cfunctions import solve_gaussian, substractArray,sumArrays, divideArray
 
 #Load Data
-def loadData(filename):   
-    data=np.genfromtxt(filename,skip_header=2)
+#def loadData(filename):
+#    data=np.genfromtxt(filename,skip_header=2)
+#    return data
+    
+import pandas as pd
+def loadData(filename):
+    data=pd.read_csv(filename,skiprows=2,header=None,delimiter="\t",names=["Age", "Error"])
     return data
 
 
 #PDP
-def solve_gaussian(x,sigma):
-    return (1. / (sigma*np.sqrt(2.*np.pi)) * np.exp(- (x) * (x) / (2. * sigma * sigma)))
+#def solve_gaussian(x,sigma):
+#    return (1. / (sigma*np.sqrt(2.*np.pi)) * np.exp(- (x) * (x) / (2. * sigma * sigma)))
 
 def PDP(x1_grid,data_array,sigma_array):
-    for i in range(0,len(data_array)):
+    sizeA=len(data_array)
+    for i in range(0,sizeA):
+        x=substractArray(x1_grid,data_array[i])
         if i==0:
-            PDF=solve_gaussian((x1_grid-data_array[i]),sigma_array[i])
+            PDF=solve_gaussian(x,sigma_array[i])
         else:
-            PDF+=(solve_gaussian((x1_grid-data_array[i]),sigma_array[i]))
-        
-    return PDF/len(data_array)
+            PDF=sumArrays(PDF,solve_gaussian(x,sigma_array[i]))
+            #PDF+=(solve_gaussian(x,sigma_array[i]))
+    return divideArray(PDF,sizeA)
 
 #KDE- Fixed -Method 1
 #Implemented from the equations presented in:
 #Vermeesch, P. (2012). On the visualisation of detrital age distributions.
 #Chemical Geology, 312, 190-194.
-def KDEp(x1_grid,data_array,bandwidth):
-	for i in range(0,len(data_array)):
-		if i==0:
-			KDE=solve_gaussian((x1_grid-data_array[i]),bandwidth)
-		else:
-			KDE+=solve_gaussian((x1_grid-data_array[i]),bandwidth)
 
-	return KDE/len(data_array)
+def KDEp(x1_grid,data_array,bandwidth):
+    #print(len(data_array))
+    sizeA=len(data_array)
+    for i in range(0,sizeA):
+        x=substractArray(x1_grid,data_array[i])
+        #print (i)
+        if i==0:
+            KDE=solve_gaussian(x,bandwidth)
+        else:
+            KDE=sumArrays(KDE,solve_gaussian(x,bandwidth))
+            #KDE+=(solve_gaussian(x,bandwidth))
+    return divideArray(KDE,sizeA)
+
+#def KDEp(x1_grid,data_array,bandwidth):
+#
+##
+##
+##	for i in range(0,len(data_array)):
+##        x=substractArray(x1_grid,data_array[i])
+##        if i==0:
+##			KDE=solve_gaussian(x,bandwidth)
+##		else:
+##			KDE+=solve_gaussian(x,bandwidth)
+#
+#	return 0
 
 #KDE-Fixed- Method 2 (Not Implemented here)
 def kde_scipy(x, x_grid, bandwidth=0.2, **kwargs):

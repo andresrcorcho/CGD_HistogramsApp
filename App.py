@@ -18,7 +18,9 @@ from io import StringIO
 import ntpath
 import pickle
 import os
+import pandas as pd
 from pathlib import Path
+from Cfunctions import GetisZeroOrString
 
 #From FBS code
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
@@ -356,7 +358,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         base.draw()
     
     def CheckForErrors(self,ages,errors):
-        Errors=[]
+        Errors=np.array([])
         error=False
         err1="Zero Value Found in Ages Col!!!"
         err2="Missing or wrong character (text, symbol) Found in Ages Col!!!"
@@ -364,29 +366,35 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         err4="Missing or wrong character (text, symbol) Found in Errors Col!!!"
         
         #Look for errors in Ages Column
-        for i in ages:
-            if i==0:
-                Errors.append(err1)
-                error=True
-            else:
-                try:
-                    aux=int(i)
-                except ValueError:
-                    Errors.append(err2)
-                    error=True
-                
+        error,ErrorsAges=GetisZeroOrString(ages,err1,err2)
+#        for i in ages:
+#            if i==0:
+#                Errors.append(err1)
+#                error=True
+#            else:
+#                try:
+#                    aux=int(i)
+#                except ValueError:
+#                    Errors.append(err2)
+#                    error=True
         #Look for errors in Uncertainties Column
-        for j in errors:
-            if j==0:
-                Errors.append(err3)
-                error=True
-            else:
-                try:
-                    aux=int(j)
-                except ValueError:
-                    Errors.append(err4)
-                    error=True
-        
+        error,ErrorsErrors=GetisZeroOrString(errors,err3,err4)
+#        for j in errors:
+#            if j==0:
+#                Errors.append(err3)
+#                error=True
+#            else:
+#                try:
+#                    aux=int(j)
+#                except ValueError:
+#                    Errors.append(err4)
+#                    error=True
+        #print(ErrorsAges)
+        #print(ErrorsErrors)
+        Errors=np.append(Errors,[ErrorsAges])
+        Errors=np.append(Errors,[ErrorsErrors])
+        #print (Errors)
+        #return error, combineArray(Errors)
         return error, Errors
     
     def selectFile(self, File):
@@ -396,20 +404,25 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         # if a file is selected
         if File:
             #The App have been initialized
-            ages=np.array([])
-            errors=np.array([])
-            self.initiated=True
+#            ages=np.array([])
+#            errors=np.array([])
+#            self.initiated=True
+#            data=loadData(File)
+#            for i in range(0,len(data)):
+#                age=data[i][0]
+#                error=data[i][1]
+#
+#                #Add Data
+#                ages=np.append(ages,[age])
+#                errors=np.append(errors,[error])
+
+            #Using Pandas approach
             data=loadData(File)
-            for i in range(0,len(data)):
-                age=data[i][0]
-                error=data[i][1]
-            
-                #Add Data
-                ages=np.append(ages,[age])
-                errors=np.append(errors,[error])
-                    
+            ages = data[['Age']].to_numpy().flatten()
+            errors =data[['Error']].to_numpy().flatten()
             #Verification of errors in file
             Verif=self.CheckForErrors(ages,errors)
+            #print(Verif)
             
             #MsgBox With Found errors
             if Verif[0]==True:
