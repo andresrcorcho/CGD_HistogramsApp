@@ -5,13 +5,15 @@ from scipy.signal import fftconvolve
 from io import StringIO
 from scipy.stats import gaussian_kde
 from kde_diffusion import kde1d
-from Cfunctions import solve_gaussian, substractArray,sumArrays, divideArray
+from Cfunctions import solve_gaussian,solve_gaussianC, substractArray,sumArrays, divideArray,PDP_C,KDEp_C
 
 #Load Data
 #def loadData(filename):
 #    data=np.genfromtxt(filename,skip_header=2)
 #    return data
     
+
+
 import pandas as pd
 def loadData(filename):
     data=pd.read_csv(filename,skiprows=2,header=None,delimiter="\t",names=["Age", "Error"])
@@ -23,15 +25,8 @@ def loadData(filename):
 #    return (1. / (sigma*np.sqrt(2.*np.pi)) * np.exp(- (x) * (x) / (2. * sigma * sigma)))
 
 def PDP(x1_grid,data_array,sigma_array):
-    sizeA=len(data_array)
-    for i in range(0,sizeA):
-        x=substractArray(x1_grid,data_array[i])
-        if i==0:
-            PDF=solve_gaussian(x,sigma_array[i])
-        else:
-            PDF=sumArrays(PDF,solve_gaussian(x,sigma_array[i]))
-            #PDF+=(solve_gaussian(x,sigma_array[i]))
-    return divideArray(PDF,sizeA)
+    PDP=PDP_C(x1_grid,data_array,sigma_array)
+    return PDP
 
 #KDE- Fixed -Method 1
 #Implemented from the equations presented in:
@@ -39,17 +34,8 @@ def PDP(x1_grid,data_array,sigma_array):
 #Chemical Geology, 312, 190-194.
 
 def KDEp(x1_grid,data_array,bandwidth):
-    #print(len(data_array))
-    sizeA=len(data_array)
-    for i in range(0,sizeA):
-        x=substractArray(x1_grid,data_array[i])
-        #print (i)
-        if i==0:
-            KDE=solve_gaussian(x,bandwidth)
-        else:
-            KDE=sumArrays(KDE,solve_gaussian(x,bandwidth))
-            #KDE+=(solve_gaussian(x,bandwidth))
-    return divideArray(KDE,sizeA)
+    KDE=KDEp_C(x1_grid,data_array,bandwidth)
+    return KDE
 
 #def KDEp(x1_grid,data_array,bandwidth):
 #

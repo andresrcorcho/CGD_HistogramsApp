@@ -20,7 +20,7 @@ import pickle
 import os
 import pandas as pd
 from pathlib import Path
-from Cfunctions import GetisZeroOrString
+from Cfunctions import GetisZeroOrString,getLocalNsamplesC,cutAgesHistogramC
 
 #From FBS code
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
@@ -817,10 +817,11 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
     def getLocalNsamples(self,Ages):
         Min=float(self.Minin.text())
         Max=float(self.Maxi.text())
-        NumAges=0
-        for age in Ages:
-            if age>=Min and age<=Max:
-                NumAges=NumAges+1
+#        NumAges=0
+#        for age in Ages:
+#            if age>=Min and age<=Max:
+#                NumAges=NumAges+1
+        NumAges=getLocalNsamplesC(Ages,Min,Max)
         return NumAges
     
     
@@ -879,6 +880,9 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.plotData.setEnabled(True)
                         
     def plotCanvas(self,Min,Max,indices,base,x1_grid,Calculation,counter):
+        import time
+
+        start = time.time()
     #Editable text
         mpl.rcParams['pdf.fonttype'] = 42
         mpl.rcParams['ps.fonttype'] = 42
@@ -931,7 +935,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             #Update Bandwidth label
             #self.updatelabel()
             #Update Number of samples within the time interval specified by the user
-            self.NSamples[i]=self.getLocalNsamples(self.DataAges[i])
+            self.NSamples[i]=self.getLocalNsamples(self.DataAges[i]) # C optimization
             #KDE Calculation --
             KDE=eval(Calculation)
             #Subplots Inicialization
@@ -941,10 +945,12 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 ax1=ax.twinx()
                 
                 #Filter Data Ages for Histogram
-                DataAgesHist=np.array([])
-                for age in self.DataAges[i]:
-                    if age>=Min and age<=Max:
-                        DataAgesHist=np.append(DataAgesHist,[age])
+#                DataAgesHist=np.array([])   # C optimization
+#                for age in self.DataAges[i]:
+#                    if age>=Min and age<=Max:
+#                        DataAgesHist=np.append(DataAgesHist,[age])
+                DataAgesHist=cutAgesHistogramC(self.DataAges[i],Min,Max)
+                
                 
                 y, x, _ =ax.hist(DataAgesHist,bins=int(float(self.bins.text())),color='cornflowerblue',edgecolor='darkgreen', linewidth=0.8, density=False)
                 ax.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
@@ -1045,10 +1051,12 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 #information about axis -from user
                 ax3=ax.twinx()
                 #Filter Data Ages for Histogram
-                DataAgesHist=np.array([])
-                for age in self.DataAges[i]:
-                    if age>=Min and age<=Max:
-                        DataAgesHist=np.append(DataAgesHist,[age])
+#                DataAgesHist=np.array([])
+#                for age in self.DataAges[i]:
+#                    if age>=Min and age<=Max:
+#                        DataAgesHist=np.append(DataAgesHist,[age])
+                        
+                DataAgesHist=cutAgesHistogramC(self.DataAges[i],Min,Max)
                 ax3.yaxis.set_major_locator(mpl.ticker.LinearLocator(8))
 #               #Histogram parameters for getting number of samples
                 hst,binss = np.histogram(DataAgesHist, bins=int(len(x1_grid))) #Fixed and based in x1_grid length
@@ -1320,7 +1328,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
            
             #Increment Plot Counter
             plotCounter+=1
-             
+            end = time.time()
+            print(end - start)
 
 #New
 import shutil,os
