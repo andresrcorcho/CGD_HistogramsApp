@@ -494,14 +494,60 @@
            <property name="title">
             <string>Parameters</string>
            </property>
-           <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0,0,0">
+           <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0,0">
             <property name="horizontalSpacing">
              <number>3</number>
             </property>
             <property name="verticalSpacing">
              <number>14</number>
             </property>
-            <item row="7" column="2">
+            <item row="10" column="0">
+             <widget class="QGroupBox" name="groupBox_3">
+              <property name="title">
+               <string/>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="QCheckBox" name="DecimalX">
+                 <property name="text">
+                  <string>DecX</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="DecimalY">
+                 <property name="text">
+                  <string>DecY</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="10" column="1">
+             <widget class="QGroupBox" name="groupBox_4">
+              <property name="title">
+               <string/>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QCheckBox" name="customBw">
+                 <property name="text">
+                  <string>custBw</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="AdaptativeBw">
+                 <property name="text">
+                  <string>AutoBw</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="7" column="1">
              <widget class="QGroupBox" name="groupBox_2">
               <property name="title">
                <string/>
@@ -553,53 +599,37 @@
               </layout>
              </widget>
             </item>
-            <item row="10" column="0">
-             <widget class="QGroupBox" name="groupBox_3">
-              <property name="title">
-               <string/>
+            <item row="9" column="1">
+             <widget class="QSlider" name="TSize">
+              <property name="minimum">
+               <number>5</number>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_4">
-               <item>
-                <widget class="QCheckBox" name="DecimalX">
-                 <property name="text">
-                  <string>DecX</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="DecimalY">
-                 <property name="text">
-                  <string>DecY</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <property name="maximum">
+               <number>20</number>
+              </property>
+              <property name="value">
+               <number>9</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
              </widget>
             </item>
-            <item row="10" column="2">
-             <widget class="QGroupBox" name="groupBox_4">
-              <property name="title">
-               <string/>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Max.</string>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_5">
-               <item>
-                <widget class="QCheckBox" name="customBw">
-                 <property name="text">
-                  <string>custBw</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="AdaptativeBw">
-                 <property name="text">
-                  <string>AutoBw</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
              </widget>
             </item>
-            <item row="3" column="4">
+            <item row="1" column="3">
+             <widget class="QLabel" name="BW">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3">
              <widget class="QCheckBox" name="savepng">
               <property name="text">
                <string>Save PNGs</string>
@@ -623,7 +653,7 @@
               </property>
              </widget>
             </item>
-            <item row="8" column="2">
+            <item row="8" column="1">
              <widget class="QCheckBox" name="geoScale">
               <property name="text">
                <string>GeoColors</string>
@@ -633,7 +663,7 @@
               </property>
              </widget>
             </item>
-            <item row="8" column="4">
+            <item row="8" column="3">
              <widget class="QCheckBox" name="YAxisTicks">
               <property name="enabled">
                <bool>true</bool>
@@ -653,57 +683,17 @@
               </property>
              </widget>
             </item>
-            <item row="9" column="2">
-             <widget class="QSlider" name="TSize">
-              <property name="minimum">
-               <number>5</number>
-              </property>
-              <property name="maximum">
-               <number>20</number>
-              </property>
-              <property name="value">
-               <number>9</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Max.</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="4">
-             <widget class="QLabel" name="BW">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="4">
+            <item row="2" column="3">
              <widget class="QCheckBox" name="savepdf">
               <property name="text">
                <string>Save PDFs</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="2">
+            <item row="2" column="1">
              <widget class="QLineEdit" name="Minin">
               <property name="text">
                <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="4">
-             <widget class="QLabel" name="peakvalue">
-              <property name="midLineWidth">
-               <number>1</number>
-              </property>
-              <property name="text">
-               <string/>
               </property>
              </widget>
             </item>
@@ -714,7 +704,123 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="2" colspan="2">
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="Maxi">
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="ticksadjust">
+              <property name="text">
+               <string>Ticks interval</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QLineEdit" name="bins">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>100</string>
+              </property>
+              <property name="readOnly">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="3">
+             <widget class="QLabel" name="tsize">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="TR">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Min.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="3">
+             <widget class="QCheckBox" name="sharedXY">
+              <property name="text">
+               <string>Shared Axes</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3">
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Bins</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0">
+             <widget class="QLabel" name="sizeT">
+              <property name="font">
+               <font>
+                <pointsize>13</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Text Size</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSlider" name="Bw">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>50</number>
+              </property>
+              <property name="pageStep">
+               <number>10</number>
+              </property>
+              <property name="value">
+               <number>25</number>
+              </property>
+              <property name="sliderPosition">
+               <number>25</number>
+              </property>
+              <property name="tracking">
+               <bool>true</bool>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="3">
+             <widget class="QCheckBox" name="DecimalPeaks">
+              <property name="text">
+               <string>DecPeaks</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="3">
+             <widget class="QLabel" name="peakvalue">
+              <property name="midLineWidth">
+               <number>1</number>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="2">
              <widget class="QSlider" name="delta">
               <property name="enabled">
                <bool>false</bool>
@@ -751,131 +857,10 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="2">
-             <widget class="QLineEdit" name="Maxi">
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="tratio">
               <property name="text">
-               <string>2000</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="ticksadjust">
-              <property name="text">
-               <string>Number of Ticks</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="2">
-             <widget class="QLineEdit" name="bins">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>100</string>
-              </property>
-              <property name="readOnly">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="4">
-             <widget class="QLabel" name="tsize">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1" colspan="3">
-             <widget class="QSlider" name="tratio">
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>50</number>
-              </property>
-              <property name="singleStep">
-               <number>1</number>
-              </property>
-              <property name="pageStep">
-               <number>1</number>
-              </property>
-              <property name="value">
-               <number>8</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="4">
-             <widget class="QLabel" name="TR">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>Min.</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="4">
-             <widget class="QCheckBox" name="sharedXY">
-              <property name="text">
-               <string>Shared Axes</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="4">
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>Bins</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="sizeT">
-              <property name="font">
-               <font>
-                <pointsize>13</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Text Size</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
-             <widget class="QSlider" name="Bw">
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>50</number>
-              </property>
-              <property name="pageStep">
-               <number>10</number>
-              </property>
-              <property name="value">
-               <number>25</number>
-              </property>
-              <property name="sliderPosition">
-               <number>25</number>
-              </property>
-              <property name="tracking">
-               <bool>true</bool>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="10" column="4">
-             <widget class="QCheckBox" name="DecimalPeaks">
-              <property name="text">
-               <string>DecPeaks</string>
+               <string>50</string>
               </property>
              </widget>
             </item>
@@ -898,35 +883,43 @@
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menugfg">
-    <property name="title">
-     <string>Layers</string>
-    </property>
-    <addaction name="actionDataSets"/>
-   </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
      <string>About</string>
     </property>
-    <addaction name="actionV_1_0"/>
+    <addaction name="versionInfo"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionSave_Current"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menugfg"/>
    <addaction name="menuAbout"/>
   </widget>
   <action name="actionDataSets">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>DataSets</string>
    </property>
   </action>
-  <action name="actionV_1_0">
+  <action name="versionInfo">
    <property name="text">
-    <string>V_1.0</string>
+    <string>Version</string>
+   </property>
+  </action>
+  <action name="actionSave_Current">
+   <property name="text">
+    <string>Save Current</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

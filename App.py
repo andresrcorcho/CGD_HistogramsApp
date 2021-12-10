@@ -44,7 +44,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #Bw Sliders Setup
         #Initial Value
         self.BW.setText(str(self.Bw.value()))
-        self.TR.setText(str(self.tratio.value()))
+        self.TR.setText(str(self.tratio.text()))
         #KDE Adaptative inactive by defect
         self.Methods.setTabEnabled(2,False)
         self.Methods.setTabEnabled(1,False)
@@ -56,11 +56,16 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         self.Bw.sliderPressed.connect(self.updatelabel)
         self.Bw.valueChanged.connect(self.updatelabel)
         self.Bw.sliderReleased.connect(self.updatelabel)
-        #Ticks Slider
-        self.tratio.sliderMoved.connect(self.updateTicks)
-        self.tratio.sliderPressed.connect(self.updateTicks)
-        self.tratio.valueChanged.connect(self.updateTicks)
-        self.tratio.sliderReleased.connect(self.updateTicks)
+#        #Ticks Slider
+#        self.tratio.sliderMoved.connect(self.updateTicks)
+#        self.tratio.sliderPressed.connect(self.updateTicks)
+#        self.tratio.valueChanged.connect(self.updateTicks)
+#        self.tratio.sliderReleased.connect(self.updateTicks)
+        #Ticks Interval
+        self.tratio.editingFinished.connect(self.updateTicks)
+        self.tratio.selectionChanged.connect(self.updateTicks)
+        self.tratio.textChanged.connect(self.updateTicks)
+        self.tratio.textEdited.connect(self.updateTicks)
         #Peaks delta slider
         self.delta.sliderMoved.connect(self.updateDelta)
         self.delta.sliderPressed.connect(self.updateDelta)
@@ -97,7 +102,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #shared mode protection
         #self.sharedXY.clicked.connect(self.shareEvent)
         #self.YAxisTicks.clicked.connect(self.shareEvent)
-        self.Hist.clicked.connect(self.shareEvent)
+        #self.Hist.clicked.connect(self.shareEvent)
         #self.geoScale.clicked.connect(self.shareEvent)
         self.flipPosition.clicked.connect(self.flipPositions)
         #self.DecimalX.clicked.connect(self.shareEvent)
@@ -418,8 +423,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
 
             #Using Pandas approach
             data=loadData(File)
-            ages = data[['Age']].to_numpy().flatten()
-            errors =data[['Error']].to_numpy().flatten()
+            ages = data[['Age']].to_numpy(dtype=float).flatten()
+            errors =data[['Error']].to_numpy(dtype=float).flatten()
             #Verification of errors in file
             Verif=self.CheckForErrors(ages,errors)
             #print(Verif)
@@ -497,7 +502,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #Array which Stores Settings Variables
         VariablesStatus=['self.dataName.text()',
                          'self.Bw.value()',
-                         'self.tratio.value()',
+                         'self.tratio.text()',
                          'float(self.Minin.text())',
                          'float(self.Maxi.text())',
                          'self.savepdf.isChecked()',
@@ -551,7 +556,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #Set status as loaded status File
         StatusVariables=['self.dataName.setText(Aux[0])',
                          'self.Bw.setValue(Aux[1])',
-                         'self.tratio.setValue(Aux[2])',
+                         'self.tratio.setText(str(Aux[2]))',
                          'self.Minin.setText(str(Aux[3]))',
                          'self.Maxi.setText(str(Aux[4]))',
                          'self.savepdf.setChecked(Aux[5])',
@@ -634,7 +639,7 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
         #Reset Status Variables
         self.dataName.setText("Unnamed")
         self.Bw.setValue(7)
-        self.tratio.setValue(2)
+        self.tratio.setText(str(50)) #Ma
         self.Minin.setText("0")
         self.Maxi.setText("2000")
         self.savepdf.setChecked(False)
@@ -714,7 +719,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
             pass
         
     def updateTicks(self):
-        self.TR.setText(str(self.tratio.value()))
+        integerInterval=int(float(self.tratio.text()))
+        self.TR.setText(str(float(integerInterval)))
     
     def updatelabel(self):
         self.Rbw=round(self.B_ratio*self.Bw.value(),1)
@@ -1173,7 +1179,8 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                         ax2.set_ylim([0,max(auMax)+(max(auMax)/4)])
                    
             #Ticks Adjust
-            adjust=(Max-Min)/(float(self.tratio.value()))
+            #adjust=(Max-Min)/(float(self.tratio.value()))
+            adjust=float(self.TR.text())
             #Arrange ticks Array
             arrangeTicks=np.arange(Min,Max,adjust)
             #Ticks Change formatting
@@ -1250,10 +1257,18 @@ class GeochronologyPlots(QtWidgets.QMainWindow, histograms.Ui_Geochronology):
                 #ax.axvspan(298.9, 541, facecolor='#9EC1A6', alpha=0.5)
                 #Proterozoic
                 ax.axvspan(541,1000, facecolor='#FBBA63', alpha=0.5)
-                ax.axvspan(1000, 1600, facecolor='#FBBB7E', alpha=0.5)
-                ax.axvspan(1600, 2500, facecolor='#F06682', alpha=0.5)
-                #Archean
-                ax.axvspan(2500, 4000, facecolor='#ED2891', alpha=0.5)
+                ax.axvspan(1000, 1600, facecolor='#FCBC7E', alpha=0.5)
+                ax.axvspan(1600, 2500, facecolor='#F16682', alpha=0.5)
+                #Neo-Archean
+                ax.axvspan(2500, 2800, facecolor='#F7ADC3', alpha=0.5)
+                #Meso-Archean
+                ax.axvspan(2800, 3200, facecolor='#F386AE', alpha=0.5)
+                #Paleo-Archean
+                ax.axvspan(3200, 3600, facecolor='#F067A6', alpha=0.5)
+                #Eoarchean
+                ax.axvspan(3600, 4000, facecolor='#D80B8C', alpha=0.5)
+                #Hadean
+                ax.axvspan(4000, 5000, facecolor='#DF4858', alpha=0.5)
             
             #Arrange ticks in the x-axis
             for i in arrangeTicks:
